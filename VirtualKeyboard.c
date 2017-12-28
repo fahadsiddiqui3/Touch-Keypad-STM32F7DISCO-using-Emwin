@@ -291,67 +291,68 @@ static void _cbKeybord(WM_MESSAGE * pMsg) {
         GUI_StoreKeyMsg(c, 1);
         GUI_StoreKeyMsg(c, 0);
       } 
-		else 
-		{
-			switch(Id)
-			{
-				case ID_BUTTON_26:/* Back Button, Get The text from edit and manipulate*/
-						  EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc));  // Get
-						  Len = strlen(acTextSrc);
-						  if (Len > 0) {
-							 acTextSrc[Len - 1] = '\0';                        // Adapt
-							 EDIT_SetText(hItem, acTextSrc);                   // Write back
-						  }	
-						  break;			
-						  
-				case ID_BUTTON_27: /* Clear Button*/
-							EDIT_SetText(hItem, "");  
-							break;
-											
-				case ID_BUTTON_28: /* Caps Lock*/
-							if(__Num == 0){
-								for (i = 0; i <= ID_BUTTON_25 - ID_BUTTON_0; i++) {
-									hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
-									BUTTON_GetText(hItem, acText, sizeof(acText)); 
-									acText[0] = __Caps==0? acText[0] - 32: acText[0] + 32;																			
-									BUTTON_SetText(hItem,(const char*)acText);
-									}
-									__Caps = ~__Caps;   /// Complemenet caps
-								}										
-							break;
-											
-				case ID_BUTTON_29: /*Space button*/
-							c = ' ';                                            // Same as other characters
-							GUI_StoreKeyMsg(c, 1);                   //For Pressed 
-							GUI_StoreKeyMsg(c, 0);						//For Released
-							break;
-									
-				case ID_BUTTON_30: /* 123*/
-							if(__Num == 0)acText[0] = '0';	
-							for (i = 0; i <10; i++) {			
-								hItem = WM_GetDialogItem(pMsg->hWin, Num_Row[i]);  //Get Dialog item
-								
-								if(__Num == 0){											//If user wanted to display num characters
-								BUTTON_SetText(hItem,acText);
-								acText[0]++;
-								} else {																		// If user wanted to show alphabets
-								acText[0]=__Caps == 0? Row_0_ASCII_L[i]:Row_0_ASCII_U[i];	//if previously upper case was visible or lower case 
-								BUTTON_SetText(hItem,(const char*)acText);						
-								}								
+      else 
+      {
+	switch(Id)
+	{
+		case ID_BUTTON_26:/* Back Button, Get The text from edit and manipulate*/
+				  EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc));  // Get
+				  Len = strlen(acTextSrc);
+				  if (Len > 0) {
+					 acTextSrc[Len - 1] = '\0';                        // Adapt
+					 EDIT_SetText(hItem, acTextSrc);                   // Write back
+				  }	
+				  break;			
+
+		case ID_BUTTON_27: /* Clear Button*/
+					EDIT_SetText(hItem, "");  
+					break;
+
+		case ID_BUTTON_28: /* Caps Lock*/
+					if(__Num == 0){
+						for (i = 0; i <= ID_BUTTON_25 - ID_BUTTON_0; i++) {
+							hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
+							BUTTON_GetText(hItem, acText, sizeof(acText)); 
+							acText[0] = __Caps==0? acText[0] - 32: acText[0] + 32;																			
+							BUTTON_SetText(hItem,(const char*)acText);
 							}
-							hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_30);
-							if(__Num == 0 )BUTTON_SetText(hItem,"ABC");
-							else BUTTON_SetText(hItem,"123");
-							__Num = ~ __Num;    // Complement Num for next selection
-							break;
-									
-				case ID_BUTTON_31: /* Enter*/		
-				default:  break;
+							__Caps = ~__Caps;   /// Complemenet caps
+						}										
+					break;
+
+		case ID_BUTTON_29: /*Space button*/
+					c = ' ';                                            // Same as other characters
+					GUI_StoreKeyMsg(c, 1);                   //For Pressed 
+					GUI_StoreKeyMsg(c, 0);						//For Released
+					break;
+
+		case ID_BUTTON_30: /* 123*/
+					if(__Num == 0)acText[0] = '0';	
+					for (i = 0; i <10; i++) {			
+						hItem = WM_GetDialogItem(pMsg->hWin, Num_Row[i]);  //Get Dialog item
+
+						if(__Num == 0){											//If user wanted to display num characters
+						BUTTON_SetText(hItem,acText);
+						acText[0]++;
+						} else {																		// If user wanted to show alphabets
+						acText[0]=__Caps == 0? Row_0_ASCII_L[i]:Row_0_ASCII_U[i];	//if previously upper case was visible or lower case 
+						BUTTON_SetText(hItem,(const char*)acText);						
+						}								
+					}
+					hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_30);
+					if(__Num == 0 )BUTTON_SetText(hItem,"ABC");
+					else BUTTON_SetText(hItem,"123");
+					__Num = ~ __Num;    // Complement Num for next selection
+					break;
+
+		case ID_BUTTON_31: /* Enter*/
 			
-			}
-		
-		
-		}
+		default:  break;
+
+	   }
+
+
+	}
 		
       break;
 		
@@ -376,7 +377,9 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
   char     acTextSrc[100 + 1];
   
   switch (pMsg->MsgId) {
+		  
   case WM_INIT_DIALOG:
+		  
   case WM_PAINT:
     //
     // Initialization of 'Window'
@@ -391,15 +394,19 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 	 EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc)); 
     EDIT_SetText(hItem, acTextSrc);
     break;
+		  
   case WM_TOUCH:
     //
     // If we touch somewhere on the screnn the keyboard gets hidden
     //
     WM_HideWindow(_hKeyboard);
     break;
+		  
   case WM_NOTIFY_PARENT:
+		  
     Id    = WM_GetId(pMsg->hWinSrc);
     NCode = pMsg->Data.v;
+		  
     switch(Id) {
     case ID_EDIT_0: // Notifications sent by 'Edit'
       switch(NCode) {
@@ -413,6 +420,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
       break;
     }
     break;
+		  
   default:
     WM_DefaultProc(pMsg);
     break;
