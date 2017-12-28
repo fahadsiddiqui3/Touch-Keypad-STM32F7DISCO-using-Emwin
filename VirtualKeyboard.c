@@ -316,14 +316,14 @@ static void _cbKeybord(WM_MESSAGE * pMsg) {
 							acText[0] = __Caps==0? acText[0] - 32: acText[0] + 32;																			
 							BUTTON_SetText(hItem,(const char*)acText);
 							}
-							__Caps = ~__Caps;   /// Complemenet caps
+							__Caps = !__Caps;   /// Toggle caps
 						}										
 					break;
 
 		case ID_BUTTON_29: /*Space button*/
-					c = ' ';                                            // Same as other characters
+					c = ' ';                                 // Same as other characters
 					GUI_StoreKeyMsg(c, 1);                   //For Pressed 
-					GUI_StoreKeyMsg(c, 0);						//For Released
+					GUI_StoreKeyMsg(c, 0);		  	//For Released
 					break;
 
 		case ID_BUTTON_30: /* 123*/
@@ -342,7 +342,7 @@ static void _cbKeybord(WM_MESSAGE * pMsg) {
 					hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_30);
 					if(__Num == 0 )BUTTON_SetText(hItem,"ABC");
 					else BUTTON_SetText(hItem,"123");
-					__Num = ~ __Num;    // Complement Num for next selection
+					__Num = !__Num;    // Toggle Num for next selection
 					break;
 
 		case ID_BUTTON_31: /* Enter*/
