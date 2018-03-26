@@ -8,7 +8,7 @@
 	Alpha
 	}Keymode;
 	
-	void CreateKeypad(WM_HWIN hWin);
+	
 	typedef struct {
 		
 		uint16_t Current_Editbox;
@@ -16,7 +16,8 @@
 		Keymode Start_Mode;
 	}keyboard_Data_t;
 	
+	void CreateKeypad(WM_HWIN hWin);
 	void Config_Keyboard(uint16_t Max_Len, uint32_t Editbox_Id, Keymode Mode);
 #endif
 
-/******************/
+/************* EOF *****/
