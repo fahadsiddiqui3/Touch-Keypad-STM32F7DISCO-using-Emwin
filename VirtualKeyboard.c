@@ -1,6 +1,8 @@
 #include "main.h"
 #include "DIALOG.h"
 #include "string.h"
+#include "keypad.h"
+#include "stdint.h"
 
 /*
 * File : Keypad.c
@@ -8,54 +10,63 @@
 * Date : 23-Sep-2017
 */
 
+/* External variables --------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
+/* Private defines -----------------------------------------------------------*/
+/* Private macros ------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+WM_HWIN _hKeyboard;	
+keyboard_Data_t KeyData;
+
 /*********************************************************************
 *
 *       Defines
 *
 **********************************************************************
 */
-#define ID_WINDOW_0            (GUI_ID_USER + 0x00)
-#define ID_BUTTON_0            (GUI_ID_USER + 0x01)  // a
-#define ID_BUTTON_1            (GUI_ID_USER + 0x02)  // b
-#define ID_BUTTON_2            (GUI_ID_USER + 0x03)  // c
-#define ID_BUTTON_3            (GUI_ID_USER + 0x04)  // etc..
-#define ID_BUTTON_4            (GUI_ID_USER + 0x05)
-#define ID_BUTTON_5            (GUI_ID_USER + 0x06)
-#define ID_BUTTON_6            (GUI_ID_USER + 0x07)
-#define ID_BUTTON_7            (GUI_ID_USER + 0x08)
-#define ID_BUTTON_8            (GUI_ID_USER + 0x09)
-#define ID_BUTTON_9            (GUI_ID_USER + 0x0A)
-#define ID_BUTTON_10           (GUI_ID_USER + 0x0B)
-#define ID_BUTTON_11           (GUI_ID_USER + 0x0C)
-#define ID_BUTTON_12           (GUI_ID_USER + 0x0D)
-#define ID_BUTTON_13           (GUI_ID_USER + 0x0E)
-#define ID_BUTTON_14           (GUI_ID_USER + 0x0F)
-#define ID_BUTTON_15           (GUI_ID_USER + 0x10)
-#define ID_BUTTON_16           (GUI_ID_USER + 0x11)
-#define ID_BUTTON_17           (GUI_ID_USER + 0x12)
-#define ID_BUTTON_18           (GUI_ID_USER + 0x13)
-#define ID_BUTTON_19           (GUI_ID_USER + 0x14)
-#define ID_BUTTON_20           (GUI_ID_USER + 0x15)
-#define ID_BUTTON_21           (GUI_ID_USER + 0x16)
-#define ID_BUTTON_22           (GUI_ID_USER + 0x17)
-#define ID_BUTTON_23           (GUI_ID_USER + 0x18)
-#define ID_BUTTON_24           (GUI_ID_USER + 0x19)
-#define ID_BUTTON_25           (GUI_ID_USER + 0x1A)  // z
-#define ID_BUTTON_26           (GUI_ID_USER + 0x1B)  // Back
-#define ID_BUTTON_27           (GUI_ID_USER + 0x1C)  // Clr
-#define ID_BUTTON_28           (GUI_ID_USER + 0x20)  // Caps
-#define ID_BUTTON_29           (GUI_ID_USER + 0x1D)  // Space
-#define ID_BUTTON_30           (GUI_ID_USER + 0x21)  // 123
-#define ID_BUTTON_31           (GUI_ID_USER + 0x22)  // Enter
+#define ID_WINDOW_0            (GUI_ID_USER + 0x20)
+#define ID_BUTTON_0            (GUI_ID_USER + 0x21)  // a
+#define ID_BUTTON_1            (GUI_ID_USER + 0x22)  // b
+#define ID_BUTTON_2            (GUI_ID_USER + 0x23)  // c
+#define ID_BUTTON_3            (GUI_ID_USER + 0x24)  // etc..
+#define ID_BUTTON_4            (GUI_ID_USER + 0x25)
+#define ID_BUTTON_5            (GUI_ID_USER + 0x26)
+#define ID_BUTTON_6            (GUI_ID_USER + 0x27)
+#define ID_BUTTON_7            (GUI_ID_USER + 0x28)
+#define ID_BUTTON_8            (GUI_ID_USER + 0x29)
+#define ID_BUTTON_9            (GUI_ID_USER + 0x2A)
+#define ID_BUTTON_10           (GUI_ID_USER + 0x2B)
+#define ID_BUTTON_11           (GUI_ID_USER + 0x2C)
+#define ID_BUTTON_12           (GUI_ID_USER + 0x2D)
+#define ID_BUTTON_13           (GUI_ID_USER + 0x2E)
+#define ID_BUTTON_14           (GUI_ID_USER + 0x2F)
+#define ID_BUTTON_15           (GUI_ID_USER + 0x30)
+#define ID_BUTTON_16           (GUI_ID_USER + 0x31)
+#define ID_BUTTON_17           (GUI_ID_USER + 0x32)
+#define ID_BUTTON_18           (GUI_ID_USER + 0x33)
+#define ID_BUTTON_19           (GUI_ID_USER + 0x34)
+#define ID_BUTTON_20           (GUI_ID_USER + 0x35)
+#define ID_BUTTON_21           (GUI_ID_USER + 0x36)
+#define ID_BUTTON_22           (GUI_ID_USER + 0x37)
+#define ID_BUTTON_23           (GUI_ID_USER + 0x38)
+#define ID_BUTTON_24           (GUI_ID_USER + 0x39)
+#define ID_BUTTON_25           (GUI_ID_USER + 0x3A)  // z
+#define ID_BUTTON_26           (GUI_ID_USER + 0x3B)  // Back
+#define ID_BUTTON_27           (GUI_ID_USER + 0x3C)  // Clr
+#define ID_BUTTON_28           (GUI_ID_USER + 0x3D)  // Caps
+#define ID_BUTTON_29           (GUI_ID_USER + 0x3E)  // Space
+#define ID_BUTTON_30           (GUI_ID_USER + 0x3F)  // 123
+#define ID_BUTTON_31           (GUI_ID_USER + 0x40)  // Enter
 
 
-#define ID_WINDOW_1            (GUI_ID_USER + 0x23)
-#define ID_EDIT_0              (GUI_ID_USER + 0x24)
+
+#define ID_EDIT_0 (GUI_ID_USER + 0x07)
+#define ID_EDIT_1 (GUI_ID_USER + 0x09)
 
 #define BUTTON_X_SIZE           75
-#define BUTTON_Y_SIZE           50
+#define BUTTON_Y_SIZE           55
 
-#define FOURTH_ROW_BUTTON_Y_SIZE  35
+#define FOURTH_ROW_BUTTON_Y_SIZE  40
 
 #define BUTTON_SPACING          5
 
@@ -76,6 +87,7 @@
 #define COLOR_BUTTON_BK_0       GUI_WHITE
 #define COLOR_BUTTON_BK_1       GUI_GRAY
 
+#define MAX_EDIT_LEN		16
 /*********************************************************************
 *
 *       Static data
@@ -91,22 +103,40 @@ static COLORS _Colors = {
   { COLOR_BUTTON_FRAME_0, COLOR_BUTTON_FRAME_1},
   { COLOR_BUTTON_BK_0,    COLOR_BUTTON_BK_1   }
 };
-
 /* First row button ids are not in order, if we need to display numerics then lots of conditions has to be check,
 so create the button id for row0 in order and the row0 characters also.
 */
-static const uint32_t Num_Row[] = {
-	ID_BUTTON_16,ID_BUTTON_22,ID_BUTTON_4,ID_BUTTON_17,ID_BUTTON_19,
-	ID_BUTTON_24,ID_BUTTON_20,ID_BUTTON_8,ID_BUTTON_14,ID_BUTTON_15
+static uint16_t Num_Row[] = 
+{
+	ID_BUTTON_16, ID_BUTTON_22, ID_BUTTON_4 , ID_BUTTON_17, ID_BUTTON_19,
+	ID_BUTTON_24, ID_BUTTON_20, ID_BUTTON_8 , ID_BUTTON_14, ID_BUTTON_15,
+	ID_BUTTON_0 , ID_BUTTON_18, ID_BUTTON_3 , ID_BUTTON_5 , ID_BUTTON_6 ,
+	ID_BUTTON_7 , ID_BUTTON_9 , ID_BUTTON_10, ID_BUTTON_11, ID_BUTTON_25,
+	ID_BUTTON_23, ID_BUTTON_2 , ID_BUTTON_21, ID_BUTTON_1 , ID_BUTTON_13,
+	ID_BUTTON_12
 };
-static const char Row_0_ASCII_U[] = "QWERTYUIOP"; 
-static const char Row_0_ASCII_L[] = "qwertyuiop"; 
+
+static char Num_Special_Char[] = 
+{
+	'1' , '2' , '3' ,'4' , '5' , '6' , '7' , '8' , '9','0', 
+	'@', '#' , '%' , '&' ,'-' , '+' , '(' , ')' , '*' , '"',
+	'|', '<' , '>' , '!' ,'?' , '_'
+};
+static char Alphabets_Char[] = 
+{
+	'q', 'w' , 'e' , 'r' ,'t' , 'y' , 'u' , 'i' , 'o' , 'p',
+	'a', 's' , 'd' , 'f' ,'g' , 'h' , 'j' , 'k' , 'l' , 'z',
+	'x', 'c' , 'v' , 'b' ,'n' , 'm'
+};
+
+
+
 /*********************************************************************
 *
 *       _aKeyboardDialogCreate
 */
 static const GUI_WIDGET_CREATE_INFO _aKeyboardDialogCreate[] = {
-  { WINDOW_CreateIndirect, "Window", ID_WINDOW_0, 0, 0, (BUTTON_X_SIZE + BUTTON_SPACING) * 10 + BUTTON_SPACING, ( (BUTTON_Y_SIZE + BUTTON_SPACING) *4) + BUTTON_SPACING, 0, 0x0, 0 },
+  { WINDOW_CreateIndirect, "Window", ID_WINDOW_0, 0, 0, (BUTTON_X_SIZE + BUTTON_SPACING) * 10 + BUTTON_SPACING, ( (BUTTON_Y_SIZE + BUTTON_SPACING) *4) + BUTTON_SPACING, 0, 0x64, 0 },
   //
   // First row
   //
@@ -157,20 +187,27 @@ static const GUI_WIDGET_CREATE_INFO _aKeyboardDialogCreate[] = {
   { BUTTON_CreateIndirect, "Enter", ID_BUTTON_31,  BUTTON_X_POS(8) , OFFSET_FOURTH_ROW_Y, BUTTON_X_SIZE * 2 , FOURTH_ROW_BUTTON_Y_SIZE, 0, 0x0, 0 },
 };
 
-/*********************************************************************
-*
-*       _aDialogCreate
-*/
-static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
-  { WINDOW_CreateIndirect, "Window", ID_WINDOW_1,  0,  0, 800, 480, 0, 0x0, 0 },
-  { EDIT_CreateIndirect,   "Edit",   ID_EDIT_0,   10, 10, 790,  60, 0, 0x64, 0 },
-};
 
 /*********************************************************************
 *
 *       _hKeyboard
 */
-static WM_HWIN _hKeyboard;  // If it is know module wide itis easier to handle, in this case
+#define ID_OK				1
+#define ID_NOT_OK  	0
+
+uint32_t Is_ID_Numeric(uint16_t Id)
+{
+	int i;
+	
+	for(i = 0; i<10;i++)
+	{
+		if(Id == Num_Row[i])
+			return ID_OK;
+	}
+	
+	return ID_NOT_OK;
+}
+
 
 /*********************************************************************
 *
@@ -186,7 +223,6 @@ static void _cbButton(WM_MESSAGE * pMsg) {
   GUI_RECT Rect;
   int      State;
   char     acText[8];
-
   switch (pMsg->MsgId) {
   case WM_PAINT:
     //
@@ -202,13 +238,14 @@ static void _cbButton(WM_MESSAGE * pMsg) {
     BUTTON_GetText(pMsg->hWin, acText, sizeof(acText));                         // Get Button text
     GUI_SetTextMode(GUI_TM_TRANS);
     Rect.x0 += 2;
-	 GUI_SetFont(&GUI_Font32B_1);
-	 WIDGET_SetDefaultEffect(&WIDGET_Effect_3D);
+	  GUI_SetFont(&GUI_Font32B_1);
     GUI_DispStringInRect(acText, &Rect, GUI_TA_HCENTER | GUI_TA_VCENTER);       // Display the button text inside the button rectangle
     break;
+		
   default:
     BUTTON_Callback(pMsg);
     break;
+		
   }
 }
 
@@ -216,6 +253,7 @@ static void _cbButton(WM_MESSAGE * pMsg) {
 *
 *       _cbKeybord
 */
+
 static void _cbKeybord(WM_MESSAGE * pMsg) {
   GUI_RECT Rect;
   static char __Caps=0;
@@ -225,206 +263,206 @@ static void _cbKeybord(WM_MESSAGE * pMsg) {
   int      NCode;
   int      Id;
   int      i;
-  char     c;
-  char     acTextSrc[100 + 1];
+  char     c; 
+
   char     acText[2]={0,0};
- // char     acTextDest[100 + 1];
+	char     acTextSrc[100 + 1];
   int      Len;
 
   switch (pMsg->MsgId)
-  {
-  case WM_INIT_DIALOG:
-    //
-    // Set a custom callback for each button
-    //
-	 hItem = pMsg->hWin;
-    WINDOW_SetBkColor(hItem, GUI_LIGHTGRAY);
-    for (i = 0; i <= ID_BUTTON_31 - ID_BUTTON_0; i++) {
-      hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
-      WM_SetCallback(hItem, _cbButton);
-    }
-    break;
-	 
-  case WM_PAINT:
-    //
-    // Fill background with black and draw a frame around the keyboard window
-    //
-	 GUI_Clear();
-    GUI_SetBkColor(GUI_BLACK);
-    WM_GetClientRect(&Rect);
-    GUI_SetColor(COLOR_BUTTON_FRAME_0);
-    GUI_DrawRoundedRect(0, 0, Rect.x1, Rect.y1 + 5, 5);
-    break;
-	 
-  case WM_NOTIFY_PARENT:
-    //
-    // The important part
-    //
-    Id    = WM_GetId(pMsg->hWinSrc);
-    NCode = pMsg->Data.v;
-    switch(NCode)
-	 {
-		case WM_NOTIFICATION_RELEASED:
-      //
-      // Get the parent window of the keyboard (it's the main dialog with the edit widget)
-      //
-      hParent = WM_GetParent(pMsg->hWin);
-      //
-      // With the handle of the parent window we can get the edit handle by its ID
-      //
-      hItem   = WM_GetDialogItem(hParent, ID_EDIT_0);
-      //
-      // Set Focus on the edit widget to make sure it gets the key input
-      //
-      WM_SetFocus(hItem);
-		EDIT_SetFont(hItem,&GUI_Font32B_1);
-      if (Id < ID_BUTTON_26) {
-        //
-        // With the ID of the pressed button calculate the character which should be displayed
-        //
-		  hItem = WM_GetDialogItem(pMsg->hWin, Id);
-		  BUTTON_GetText(hItem, acText, sizeof(acText)); 
-        c = acText[0];
-        //
-        // Store key messages, important that we generate two since every key needs to be released, too
-        //
-        GUI_StoreKeyMsg(c, 1);
-        GUI_StoreKeyMsg(c, 0);
-      } 
-      else 
-      {
-	switch(Id)
 	{
-		case ID_BUTTON_26:/* Back Button, Get The text from edit and manipulate*/
-				  EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc));  // Get
-				  Len = strlen(acTextSrc);
-				  if (Len > 0) {
-					 acTextSrc[Len - 1] = '\0';                        // Adapt
-					 EDIT_SetText(hItem, acTextSrc);                   // Write back
-				  }	
-				  break;			
-
-		case ID_BUTTON_27: /* Clear Button*/
-					EDIT_SetText(hItem, "");  
+		case WM_INIT_DIALOG:
+					// Set a custom callback for each button
+					hItem = pMsg->hWin;
+					WINDOW_SetBkColor(hItem, GUI_LIGHTGRAY);
+					for (i = 0; i <= ID_BUTTON_31 - ID_BUTTON_0; i++) 
+					{
+						hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
+						WM_SetCallback(hItem, _cbButton);
+					}			
+					__Caps = 0;
+					__Num  = 0;
 					break;
+		 
+		case WM_PAINT:
+					// Fill background with black and draw a frame around the keyboard window
+					GUI_SetBkColor(GUI_LIGHTGRAY);
+					WM_GetClientRect(&Rect);
+					GUI_SetColor(COLOR_BUTTON_FRAME_0);
+					GUI_DrawRoundedRect(0, 0, Rect.x1, Rect.y1 + 5, 5);
+					break;
+		 
+		case WM_NOTIFY_PARENT:
+		
+				// The important part
+				Id    = WM_GetId(pMsg->hWinSrc);
+				NCode = pMsg->Data.v;
+				switch(NCode)
+				{
+				case WM_NOTIFICATION_RELEASED:
 
-		case ID_BUTTON_28: /* Caps Lock*/
-					if(__Num == 0){
-						for (i = 0; i <= ID_BUTTON_25 - ID_BUTTON_0; i++) {
-							hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
-							BUTTON_GetText(hItem, acText, sizeof(acText)); 
-							acText[0] = __Caps==0? acText[0] - 32: acText[0] + 32;																			
-							BUTTON_SetText(hItem,(const char*)acText);
+					// Get the parent window of the keyboard (it's the main dialog with the edit widget)
+					hParent = WM_GetParent(pMsg->hWin);
+
+					// With the handle of the parent window we can get the edit handle by its ID
+					hItem   = WM_GetDialogItem(hParent, KeyData.Current_Editbox);
+
+					// Set Focus on the edit widget to make sure it gets the key input
+					 WM_SetFocus(hItem);
+
+					 EDIT_SetFont(hItem,&GUI_Font32_1);
+					 EDIT_GetText(hItem, acTextSrc,sizeof(acTextSrc));
+
+					if (Id < ID_BUTTON_26) 
+					{
+
+						// With the ID of the pressed button calculate the character which should be displayed
+						hItem = WM_GetDialogItem(pMsg->hWin, Id);
+
+						BUTTON_GetText(hItem, acText, sizeof(acText)); 
+						c = acText[0];
+
+						// Store key messages, important that we generate two since every key needs to be released, too
+						if(strlen(acTextSrc) < KeyData.Max_Len)
+						{
+							switch (KeyData.Start_Mode)
+							{
+								case Alpha :  GUI_StoreKeyMsg(c, 1);
+									GUI_StoreKeyMsg(c, 0);
+									break;
+								case Numeric: 
+									if(__Num != 0)
+									{
+										if(Is_ID_Numeric(Id) == ID_OK)
+										{
+											GUI_StoreKeyMsg(c, 1);
+											GUI_StoreKeyMsg(c, 0);
+										}
+									}
+									break;
+
+								default : 	GUI_StoreKeyMsg(c, 1);
+								GUI_StoreKeyMsg(c, 0);
+								break;
 							}
-							__Caps = !__Caps;   /// Toggle caps
-						}										
+						}
+					} 
+					else 
+					{
+						switch(Id)
+						{
+							case  ID_BUTTON_26:
+										/* Back Button, Get The text from edit and manipulate*/
+										EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc));  // Get
+										Len = strlen(acTextSrc);
+										if (Len > 0) 
+										{
+										 acTextSrc[Len - 1] = '\0';                        // Adapt
+										 EDIT_SetText(hItem, acTextSrc);                   // Write back
+										}	
+										break;			
+
+							case  ID_BUTTON_27: /* Clear Button*/
+										EDIT_SetText(hItem, "");  
+										break;
+
+							case  ID_BUTTON_28: /* Caps Lock*/
+										if(__Num == 0)
+										{
+											for (i = 0; i <= ID_BUTTON_25 - ID_BUTTON_0; i++)
+											{
+
+												hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0 + i);
+
+												BUTTON_GetText(hItem, acText, sizeof(acText)); 
+
+												acText[0] = __Caps==0? acText[0] - 32: acText[0] + 32;				
+
+												BUTTON_SetText(hItem,(const char*)acText);
+
+												}
+												__Caps = ~__Caps;// Complemenet caps
+											}										
+										break;
+
+							case  ID_BUTTON_29: /*Space button*/
+										c = ' ';      															// Same as other characters
+										if(acTextSrc[0]!= '\0')
+										{
+											if(acTextSrc[strlen(acTextSrc)-1]!= ' ')
+											{
+												GUI_StoreKeyMsg(c, 1);                   //For Pressed 
+												GUI_StoreKeyMsg(c, 0);		      				 //For Released
+											}
+										}
+										break;
+
+							case  ID_BUTTON_30: /* 123*/
+
+										if(__Num != 0)
+											acText[0] = 'a';	
+
+										for (i = 0; i <26; i++) 
+										{			
+
+												hItem = WM_GetDialogItem(pMsg->hWin, Num_Row[i]);  //Get Dialog item
+
+												if(__Num == 0) //If user wanted to display num characters
+												{		
+
+													acText[0] = Num_Special_Char[i];																	
+													BUTTON_SetText(hItem,(const char *)acText);
+
+												} 
+												else // If user wanted to show alphabets
+												{			
+
+													//if previously upper case was visible or lower case 
+													acText[0]= __Caps == 0 ? Alphabets_Char[i] /*lower case */: Alphabets_Char[i]-32/*Upper Case*/ ;	
+													BUTTON_SetText(hItem,(const char*)acText);						
+											}								
+										}
+										hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_30);
+
+										if(__Num == 0 )
+											BUTTON_SetText(hItem,"ABC");
+										else 
+											BUTTON_SetText(hItem,"123");
+
+										__Num = ~ __Num;    // Complement Num for next selection
+										break;
+
+							case  ID_BUTTON_31: 
+										WM_HideWindow(_hKeyboard);																								
+										break; /* Enter*/		
+
+							default:  break;
+
+					 }
+
+				 }
+
 					break;
 
-		case ID_BUTTON_29: /*Space button*/
-					c = ' ';                                 // Same as other characters
-					GUI_StoreKeyMsg(c, 1);                   //For Pressed 
-					GUI_StoreKeyMsg(c, 0);		  	//For Released
-					break;
+				}//Switch case 2
 
-		case ID_BUTTON_30: /* 123*/
-					if(__Num == 0)acText[0] = '0';	
-					for (i = 0; i <10; i++) {			
-						hItem = WM_GetDialogItem(pMsg->hWin, Num_Row[i]);  //Get Dialog item
-
-						if(__Num == 0){											//If user wanted to display num characters
-						BUTTON_SetText(hItem,acText);
-						acText[0]++;
-						} else {																		// If user wanted to show alphabets
-						acText[0]=__Caps == 0? Row_0_ASCII_L[i]:Row_0_ASCII_U[i];	//if previously upper case was visible or lower case 
-						BUTTON_SetText(hItem,(const char*)acText);						
-						}								
-					}
-					hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_30);
-					if(__Num == 0 )BUTTON_SetText(hItem,"ABC");
-					else BUTTON_SetText(hItem,"123");
-					__Num = !__Num;    // Toggle Num for next selection
-					break;
-
-		case ID_BUTTON_31: /* Enter*/
-			
-		default:  break;
-
-	   }
-
-
-	}
-		
-      break;
-		
-    }
+				break;
+				
+			default:
+							WM_DefaultProc(pMsg);
+							break;
 	 
-    break;
-  default:
-    WM_DefaultProc(pMsg);
-    break;
-	 
-  }
+   }//Switch case 1
+	
 }
 
-/*********************************************************************
-*
-*       _cbDialog
-*/
-static void _cbDialog(WM_MESSAGE * pMsg) {
-  WM_HWIN hItem;
-  int     NCode;
-  int     Id;
-  char     acTextSrc[100 + 1];
-  
-  switch (pMsg->MsgId) {
-		  
-  case WM_INIT_DIALOG:
-		  
-  case WM_PAINT:
-    //
-    // Initialization of 'Window'
-    //
-    hItem = pMsg->hWin;
-    WINDOW_SetBkColor(hItem, GUI_MAKE_COLOR(0x00000000));
-    //
-    // Initialization of 'Edit'
-    //
-    hItem = WM_GetDialogItem(pMsg->hWin, ID_EDIT_0);
-	 GUI_SetFont(&GUI_FontD32);
-	 EDIT_GetText(hItem, acTextSrc, sizeof(acTextSrc)); 
-    EDIT_SetText(hItem, acTextSrc);
-    break;
-		  
-  case WM_TOUCH:
-    //
-    // If we touch somewhere on the screnn the keyboard gets hidden
-    //
-    WM_HideWindow(_hKeyboard);
-    break;
-		  
-  case WM_NOTIFY_PARENT:
-		  
-    Id    = WM_GetId(pMsg->hWinSrc);
-    NCode = pMsg->Data.v;
-		  
-    switch(Id) {
-    case ID_EDIT_0: // Notifications sent by 'Edit'
-      switch(NCode) {
-      case WM_NOTIFICATION_RELEASED:
-        //
-        // After a click inside the edit widget, we show the keyboard
-        //
-        WM_ShowWindow(_hKeyboard);
-        break;
-      }
-      break;
-    }
-    break;
-		  
-  default:
-    WM_DefaultProc(pMsg);
-    break;
-  }
+void Config_Keyboard(uint16_t Max_Len, uint32_t Editbox_Id, Keymode Mode)
+{
+
+					KeyData.Start_Mode = Mode;
+					KeyData.Max_Len = Max_Len; // Max Len 		
+					KeyData.Current_Editbox = Editbox_Id;
+
 }
 
 /*********************************************************************
@@ -437,20 +475,18 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 *
 *       MainTask
 */
-void MainTask(void) {
-  static WM_HWIN hWin;
+void CreateKeypad(WM_HWIN hWin) 
+{
+	
   int xSize, ySize;
   int xPos,  yPos;
-    GUI_Clear();
- // GUI_Init();
-  //
-  WIDGET_SetDefaultEffect(&WIDGET_Effect_3D);
-  // Create te main dialog containing an edit widget and a keyboard dialog
 
-  hWin       = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbDialog, WM_HBKWIN, 0, 0);
+  WIDGET_SetDefaultEffect(&WIDGET_Effect_3D);
+
   //
   // Get some properties and calculate the x and y position for the keaboard
   //
+	
   xSize      = WM_GetWindowSizeX(hWin);
   ySize      = WM_GetWindowSizeY(hWin);
   xPos       = (xSize - ((BUTTON_X_SIZE + BUTTON_SPACING) * 10 + BUTTON_SPACING)) / 2;
@@ -459,7 +495,8 @@ void MainTask(void) {
   // Create the keyboard dialog as a child of the main dialog, but hide it for the beginning
   //
   _hKeyboard = GUI_CreateDialogBox(_aKeyboardDialogCreate, GUI_COUNTOF(_aKeyboardDialogCreate), _cbKeybord, hWin, xPos, yPos);
- // WM_HideWindow(_hKeyboard);  // It's hidden
 
+   WM_HideWindow(_hKeyboard);  // It's hidden.......
+	
 
 }
