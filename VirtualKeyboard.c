@@ -3,7 +3,6 @@
 #include "string.h"
 #include "keypad.h"
 #include "stdint.h"
-
 /*
 * File : Keypad.c
 * Created by : Fahad Siddiqui
